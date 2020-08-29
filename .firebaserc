@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "fir-line-login-sample",
+    "development": "fir-line-login-sample"
+  }
+}
