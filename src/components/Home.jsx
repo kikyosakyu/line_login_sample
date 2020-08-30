@@ -42,11 +42,9 @@ const Home = () => {
       code: code,
       redirect_uri: redirect_uri
     }
-
-    axios.post(url, body).then(responce => {
-      alert(responce)
+    axios.post(url, body).then(res => {
+      alert(res)
     })
-    
     
   }, [])
   
