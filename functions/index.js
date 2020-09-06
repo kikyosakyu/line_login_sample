@@ -36,27 +36,64 @@ exports.lineLogin = functions.region('asia-northeast1').https.onRequest((req, re
     params.append('redirect_uri', redirect_uri)
     params.append('client_id', line_login_channel_id)
     params.append('client_secret', line_login_client_secret)
+    let lineAccessToken
     await axios.post(url, params)
-      .then(async res => {
-        console.log("Responce : " + res)
-        await admin.firestore().collection('res').add({res: res});
+      .then(async responce => {
+        console.log("Responce : " + Object.keys(responce.data))
+        lineAccessToken = responce.data.access_token
       }).catch(error => {
         console.error("Error...... : " + error)
         return res.status(500).json({error: error})
       })
-    
-    
 
+    const createRequest = {}
+    await axios({
+      method: 'get',
+      url: 'https://api.line.me/v2/profile',
+      headers: {
+        'Authorization': `Bearer ${lineAccessToken}`,
+      },
+    }).then(async responce => {
+      console.log(Object.keys(responce.data))
+      createRequest["uid"] = 'line:' + responce.data.userId
+      createRequest["displayName"] = responce.data.displayName
+      createRequest["pictureUrl"] = responce.data.pictureUrl
 
+      await admin.auth().getUser(createRequest.uid).then(()=>{
+        console.log(`user ${createRequest.uid} was found`)
+      }).catch(async error => {
+        if (error.code === 'auth/user-not-found'){
+          await admin.auth().createUser(createRequest).then(() => {
+            console.log('created user succesfully.')
+          })
+        }
+      })
+    }).catch(error => {
+      console.error("Error...... : " + error)
+        return res.status(500).json({error: error})
+    })
+
+    
+    const claims = {
+      provider: 'LINE'
+    }
+    console.log(claims)
+    await admin.auth().setCustomUserClaims(createRequest.uid, claims)
+    
+    const firebaseCustomToken = await admin.auth().createCustomToken(createRequest.uid)
+    
+    res.status(200).send({
+      firebase_token: firebaseCustomToken
+    })
     
     // Push the new message into Cloud Firestore using the Firebase Admin SDK.
     
-    const writeResult = await admin.firestore().collection('test').add({
-      code: code,
-      redirect_uri: redirect_uri
-    });
+    // const writeResult = await admin.firestore().collection('test').add({
+    //   code: code,
+    //   redirect_uri: redirect_uri
+    // });
     // Send back a message that we've succesfully written the message
-    res.status(200).send();
+    
   })
 
 

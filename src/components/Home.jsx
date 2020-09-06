@@ -35,7 +35,7 @@ const Home = () => {
       window.location.href = window.location.origin
     }
 
-    const redirect_uri = window.location.origin
+    const redirect_uri = `${window.location.origin}/home`
 
     const url = `${environment.cloud_functions.host_name}/lineLogin`
     const body = {
