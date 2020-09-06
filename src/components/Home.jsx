@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react'
 import Cokkies from 'js-cookie'
 import {environment} from '../environment'
+import {auth} from '../firebaseIndex'
 import axios from 'axios'
 
 const Home = () => {
@@ -42,9 +43,21 @@ const Home = () => {
       code: code,
       redirect_uri: redirect_uri
     }
+    let customToken
     axios.post(url, body).then(res => {
-      alert(res)
+      console.log(res)
+      customToken = res.data.firebase_token
+      auth.signInWithCustomToken(customToken).catch(error => {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // ...
+      });
     })
+
+    
+
+    
     
   }, [])
   
