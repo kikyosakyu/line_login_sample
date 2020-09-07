@@ -20,7 +20,7 @@ const SignIn = () => {
     const end_point = 'https://access.line.me/oauth2/v2.1/authorize'
     const response_type = encodeURIComponent('code')
     const client_id = environment.line.login.channel_id
-    const redirect_uri = encodeURIComponent(window.location.href + 'home')
+    const redirect_uri = encodeURIComponent(window.location.origin + '/redirect')
     const state = chars.join("")
     const scope = encodeURIComponent('openid profile')
     const url = `${end_point}?response_type=${response_type}&client_id=${client_id}&`

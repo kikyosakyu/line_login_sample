@@ -57,7 +57,7 @@ exports.lineLogin = functions.region('asia-northeast1').https.onRequest((req, re
       console.log(Object.keys(responce.data))
       createRequest["uid"] = 'line:' + responce.data.userId
       createRequest["displayName"] = responce.data.displayName
-      createRequest["pictureUrl"] = responce.data.pictureUrl
+      createRequest["photoURL"] = responce.data.pictureUrl
 
       await admin.auth().getUser(createRequest.uid).then(()=>{
         console.log(`user ${createRequest.uid} was found`)

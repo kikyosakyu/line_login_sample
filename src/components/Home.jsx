@@ -1,73 +1,33 @@
-import React, {useEffect} from 'react'
-import Cokkies from 'js-cookie'
-import {environment} from '../environment'
+import React, {useEffect, useContext, useState} from 'react'
+import {withRouter} from 'react-router'
+import {AuthContext} from '../auth/AuthProvider'
 import {auth} from '../firebaseIndex'
-import axios from 'axios'
 
-const Home = () => {
 
+
+const Home = ({history}) => {
+  const {currentUser} = useContext(AuthContext)
+  const [displayName, setDisplayName] = useState("")
+  const [photoURL, setPhotoURL] = useState("")
   
   useEffect(()=>{
-    const query = window.location.search.slice(1)
-    const queries = {}
-    
-    if (!query) {
-      window.location.href = window.location.origin
-    } else {
-      query.split('&').forEach((query) =>  {
-        var queryArr = query.split('=');
-        queries[queryArr[0]] = queryArr[1];
-      });
+    if(currentUser != null) {
+      console.log(currentUser)
+      setDisplayName(currentUser.displayName)
+      setPhotoURL(currentUser.photoURL)
     }
-
-    const responded_error = queries['error'];
-    const responded_error_description = queries['error_description'];
-
-    if (responded_error) {
-      console.error(responded_error_description);
-      window.location.href = window.location.origin
-    }
-
-    const code = queries['code'];
-    const state = queries['state'];
-
-    if (state !== Cokkies.get('auth_state')) {
-      console.error('state is wrong');
-      window.location.href = window.location.origin
-    }
-
-    const redirect_uri = `${window.location.origin}/home`
-
-    const url = `${environment.cloud_functions.host_name}/lineLogin`
-    const body = {
-      code: code,
-      redirect_uri: redirect_uri
-    }
-    let customToken
-    axios.post(url, body).then(res => {
-      console.log(res)
-      customToken = res.data.firebase_token
-      auth.signInWithCustomToken(customToken).catch(error => {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ...
-      });
-    })
-
-    
-
-    
     
   }, [])
   
   return(
     <div>
-      {window.location.search}
-      {(Cokkies.get('auth_state'))}
+      <h2>Home</h2>
+      <p>hello {displayName}!!</p>
+      <img src={photoURL}/>
+      <button onClick={() => auth.signOut()}>Sign out</button>
     </div>
   )
 }
 
 
-export default Home
+export default withRouter(Home)
